@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viral Newspaper Poster Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for authentic newspaper and wizard typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-special { font-family: 'Special Elite', cursive; }
+        .font-courier { font-family: 'Courier Prime', monospace; }
+
+        /* Print styles to force exact Letter size output */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #poster-container, #poster-container * {
+                visibility: visible;
+            }
+            #poster-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 8.5in !important;
+                height: 11in !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                transform: none !important;
+            }
+            @page {
+                size: letter;
+                margin: 0;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 h-full flex flex-col font-courier antialiased">
+
+    <!-- Header -->
+    <header class="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between shrink-0 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="bg-amber-600 text-zinc-950 p-2 rounded font-cinzel font-black text-xl shadow">📰</div>
+            <div>
+                <h1 class="font-cinzel font-bold text-xl tracking-wider text-amber-500">The Daily Prophet & Gazette</h1>
+                <p class="text-xs text-zinc-400">Viral TikTok Poster & Newspaper Generator (8.5 x 11 in)</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="window.print()" class="bg-amber-600 hover:bg-amber-500 text-zinc-950 font-bold px-5 py-2.5 rounded-lg transition shadow-lg flex items-center space-x-2 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                <span>Print / Save as PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        
+        <!-- Controls Sidebar -->
+        <aside class="w-full lg:w-96 bg-zinc-900 border-r border-zinc-800 flex flex-col shrink-0 overflow-y-auto p-6 space-y-6">
+            
+            <!-- Template Selector -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">1. Choose Template Style</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setTemplate('wizard')" id="btn-wizard" class="p-3 text-left rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center space-y-1 bg-amber-950/40 border-amber-600 text-amber-300">
+                        <span class="text-lg">🧙‍♂️</span>
+                        <span class="text-center">Wizard</span>
+                    </button>
+                    <button onclick="setTemplate('undesirable')" id="btn-undesirable" class="p-3 text-left rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center space-y-1 bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-800/80">
+                        <span class="text-lg">🚨</span>
+                        <span class="text-center">Undesirable</span>
+                    </button>
+                    <button onclick="setTemplate('vintage')" id="btn-vintage" class="p-3 text-left rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center space-y-1 bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-800/80">
+                        <span class="text-lg">🗞️</span>
+                        <span class="text-center">Vintage News</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Photo Upload & Adjustments -->
+            <div class="space-y-3">
+                <label class="block text-xs font-bold uppercase tracking-wider text-amber-400">2. Friend's Photo</label>
+                <div class="flex items-center space-x-3">
+                    <label class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 font-medium px-4 py-2.5 rounded-lg cursor-pointer text-center text-sm transition flex items-center justify-center space-x-2">
+                        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Upload Image</span>
+                        <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
+                    <button onclick="resetImage()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 p-2.5 rounded-lg border border-zinc-700 transition" title="Reset Image">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+                <!-- Image Adjustments -->
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                        <label class="text-[10px] text-zinc-400 block mb-1">Zoom: <span id="zoom-val">100</span>%</label>
+                        <input type="range" id="img-zoom" min="50" max="300" value="100" class="w-full accent-amber-600" oninput="updateImageTransform()">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-zinc-400 block mb-1">Filter Style</label>
+                        <select id="img-filter" class="w-full bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-amber-600" onchange="updateImageTransform()">
+                            <option value="sepia">Azkaban Sepia</option>
+                            <option value="grayscale">Grayscale Noir</option>
+                            <option value="highcontrast">High Contrast</option>
+                            <option value="none">Normal / Raw</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Fields -->
+            <div class="space-y-4 pt-2 border-t border-zinc-800">
+                <label class="block text-xs font-bold uppercase tracking-wider text-amber-400">3. Text & Details</label>
+                
+                <!-- Headline -->
+                <div>
+                    <label class="block text-[11px] text-zinc-300 mb-1" id="label-headline">Main Headline</label>
+                    <input type="text" id="input-headline" value="HAVE YOU SEEN THIS WIZARD?" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-600" oninput="updateText()">
+                </div>
+
+                <!-- Subheadline / Name -->
+                <div>
+                    <label class="block text-[11px] text-zinc-300 mb-1" id="label-subhead">Name / Subject</label>
+                    <input type="text" id="input-subhead" value="SIRIUS BLACK" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-600" oninput="updateText()">
+                </div>
+
+                <!-- Reward / Footer Tag -->
+                <div id="group-reward">
+                    <label class="block text-[11px] text-zinc-300 mb-1">Reward / Bounty Amount</label>
+                    <input type="text" id="input-reward" value="REWARD: 10,000 GALLEONS" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-600" oninput="updateText()">
+                </div>
+
+                <!-- Date / Edition -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] text-zinc-300 mb-1">Date / Issue</label>
+                        <input type="text" id="input-date" value="OCTOBER 31, 1981" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-600" oninput="updateText()">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-zinc-300 mb-1">Price / Paper Name</label>
+                        <input type="text" id="input-paper" value="THE DAILY PROPHET • 5 KNUTS" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-600" oninput="updateText()">
+                    </div>
+                </div>
+
+                <!-- Article Body / Description -->
+                <div id="group-body">
+                    <label class="block text-[11px] text-zinc-300 mb-1">Article / Description Text</label>
+                    <textarea id="input-body" rows="4" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:border-amber-600 resize-none" oninput="updateText()">Minister of Magic Cornelius Fudge has confirmed that dangerous fugitive Sirius Black, unrepentant mass murderer and supporter of He-Who-Must-Not-Be-Named, has been spotted laughing in broad daylight in Muggle London. Citizens are advised not to approach under any circumstances.</textarea>
+                </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="pt-2 border-t border-zinc-800">
+                <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Popular TikTok Memes</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="loadPreset('wizard')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs py-2 px-3 rounded border border-zinc-700 text-center transition">⚡ Sirius Black</button>
+                    <button onclick="loadPreset('undesirable')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs py-2 px-3 rounded border border-zinc-700 text-center transition">🪄 Undesirable #1</button>
+                    <button onclick="loadPreset('missing')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs py-2 px-3 rounded border border-zinc-700 text-center transition">🕵️ Missing Friend</button>
+                    <button onclick="loadPreset('funny')" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs py-2 px-3 rounded border border-zinc-700 text-center transition">👑 Most Dramatic</button>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Preview Canvas / Stage -->
+        <main class="flex-1 bg-zinc-950 p-6 flex flex-col items-center justify-center overflow-auto relative">
+            
+            <!-- Scale Helper Notice -->
+            <div class="absolute top-3 right-6 text-xs text-zinc-500 hidden sm:block">
+                <span>Layout: 8.5" x 11" Letter Aspect Ratio</span>
+            </div>
+
+            <!-- Wrapper for the 8.5x11 Poster -->
+            <div class="shadow-2xl transition-all duration-300 my-auto flex items-center justify-center" id="poster-scale-wrapper">
+                
+                <!-- POSTER CONTAINER (Exact proportion: 816px x 1056px for Letter at 96DPI) -->
+                <div id="poster-container" class="w-[816px] h-[1056px] relative overflow-hidden flex flex-col transition-all duration-300 select-none bg-[#f4ecd8] text-[#1a1611] p-12 shadow-2xl" style="box-sizing: border-box;">
+                    
+                    <!-- WIZARD TEMPLATE LAYER -->
+                    <div id="layout-wizard" class="absolute inset-0 p-12 flex flex-col justify-between z-10 bg-[#eedecc] border-[16px] border-[#382715] shadow-inner" style="background-image: radial-gradient(circle, #f9f1e3 0%, #d8c2a8 100%);">
+                        
+                        <!-- Top Header -->
+                        <div class="text-center space-y-1">
+                            <div class="text-xs tracking-[0.3em] font-cinzel font-bold text-[#5c3e21]" id="display-paper">THE DAILY PROPHET • 5 KNUTS</div>
+                            <h2 class="font-cinzel font-black text-6xl tracking-widest text-[#26180a] py-2 drop-shadow-sm uppercase" id="display-headline">HAVE YOU SEEN THIS WIZARD?</h2>
+                            <div class="w-48 h-0.5 bg-[#5c3e21] mx-auto"></div>
+                            <div class="text-sm font-cinzel tracking-widest text-[#4a321a] pt-1" id="display-date">OCTOBER 31, 1981</div>
+                        </div>
+
+                        <!-- Center Photo Box with Interactive Drag/Pan/Zoom -->
+                        <div class="my-auto mx-auto w-[420px] h-[520px] bg-[#2b1f14] p-4 shadow-2xl border-4 border-[#1a120b] relative flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing group" id="photo-drop-zone">
+                            <div class="w-full h-full relative overflow-hidden bg-black" id="photo-viewport" onmousedown="startDrag(event)" ontouchstart="startDrag(event)">
+                                <img id="user-photo" src="https://placehold.co/600x800/3e271a/d4b595?text=Drop+Friend+Photo" class="absolute w-full h-full object-cover select-none pointer-events-none filter sepia-[0.7] contrast-[1.2]" style="left: 0px; top: 0px;">
+                            </div>
+                            <!-- Corner Vignette / Aging Overlays -->
+                            <div class="absolute inset-0 pointer-events-none border-[12px] border-black/30 shadow-inner"></div>
+                        </div>
+
+                        <!-- Bottom Footer Text & Reward -->
+                        <div class="text-center space-y-3 pb-4">
+                            <h3 class="font-cinzel font-black text-4xl text-[#26180a] tracking-wider uppercase" id="display-subhead">SIRIUS BLACK</h3>
+                            <div class="bg-[#382715] text-[#f4ecd8] py-2.5 px-6 inline-block font-cinzel font-bold text-lg tracking-widest rounded shadow border border-[#5c3e21]" id="display-reward">
+                                REWARD: 10,000 GALLEONS
+                            </div>
+                            <p class="font-playfair italic text-xs text-[#5c3e21] max-w-lg mx-auto leading-relaxed" id="display-body">
+                                Minister of Magic Cornelius Fudge has confirmed that dangerous fugitive Sirius Black has been spotted laughing in broad daylight.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- UNDESIRABLE TEMPLATE LAYER -->
+                    <div id="layout-undesirable" class="absolute inset-0 p-12 flex flex-col justify-between z-0 bg-[#121110] text-[#d4af37] border-[16px] border-[#2b261f]" style="background-image: repeating-linear-gradient(45deg, #171512 0, #171512 10px, #121110 10px, #121110 20px);">
+                        
+                        <!-- Top Header -->
+                        <div class="text-center space-y-2 pt-2">
+                            <h2 class="font-cinzel font-black text-6xl tracking-[0.25em] text-[#d4af37] drop-shadow-[0_2px_10px_rgba(212,175,55,0.3)] uppercase">UNDESIRABLE</h2>
+                            <div class="text-3xl font-cinzel font-black tracking-widest text-zinc-100 bg-[#2b261f] py-1 px-8 inline-block border border-[#d4af37]/40 shadow" id="display-undesirable-no">NO. 1</div>
+                        </div>
+
+                        <!-- Center Photo Box -->
+                        <div class="my-auto mx-auto w-[420px] h-[480px] bg-black p-3 shadow-2xl border-4 border-[#d4af37]/60 relative flex items-center justify-center overflow-hidden">
+                            <div class="w-full h-full relative overflow-hidden bg-zinc-900" id="photo-viewport-2">
+                                <img id="user-photo-2" src="https://placehold.co/600x800/1a1a1a/d4af37?text=Drop+Friend+Photo" class="absolute w-full h-full object-cover select-none pointer-events-none filter grayscale contrast-[1.4]">
+                            </div>
+                            <div class="absolute inset-0 pointer-events-none border-[16px] border-black/60"></div>
+                        </div>
+
+                        <!-- Bottom Footer Text & Bounty -->
+                        <div class="text-center space-y-4 pb-6">
+                            <h3 class="font-cinzel font-black text-3xl text-zinc-100 tracking-widest uppercase" id="display-subhead-2">HARRY POTTER</h3>
+                            <div class="bg-[#d4af37] text-zinc-950 py-3 px-8 inline-block font-cinzel font-black text-xl tracking-widest rounded-none shadow-lg uppercase" id="display-reward-2">
+                                FOR THE INTERROGATION OF MINISTRY SECRETS
+                            </div>
+                            <p class="font-courier text-xs text-zinc-400 max-w-md mx-auto leading-relaxed" id="display-body-2">
+                                Anyone providing information leading to the arrest or capture of this individual will be handsomely rewarded by order of the Minister.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- VINTAGE NEWSPAPER TEMPLATE LAYER -->
+                    <div id="layout-vintage" class="absolute inset-0 p-10 flex flex-col justify-between z-0 bg-[#f7f3e8] text-[#1c1813]" style="background-image: radial-gradient(circle, #f9f6ed 0%, #e6dcc6 100%);">
+                        
+                        <!-- Vintage Header -->
+                        <div class="border-b-4 border-double border-[#1c1813] pb-4 text-center">
+                            <div class="flex justify-between items-center text-xs font-bold uppercase tracking-widest border-b border-[#1c1813] pb-1 mb-2 px-2">
+                                <span id="display-vintage-date">OCTOBER 31, 1981</span>
+                                <span class="font-cinzel text-lg tracking-widest">THE DAILY GAZETTE</span>
+                                <span id="display-vintage-price">PRICE FIVE CENTS</span>
+                            </div>
+                            <h2 class="font-playfair font-black text-5xl md:text-6xl tracking-tight uppercase py-2" id="display-headline-vintage">SHOCKING DISCOVERY IN THE HEART OF THE CITY</h2>
+                            <p class="font-playfair italic text-sm text-[#4a3f30]" id="display-subhead-vintage">Local Authorities Puzzled As Mystery Unfolds Before Midnight</p>
+                        </div>
+
+                        <!-- Two Column News Layout -->
+                        <div class="grid grid-cols-2 gap-6 my-auto items-center">
+                            <!-- Left Column Image -->
+                            <div class="w-full h-[400px] bg-[#d9cca8] p-2 border-2 border-[#1c1813] shadow-md relative overflow-hidden flex items-center justify-center">
+                                <div class="w-full h-full relative overflow-hidden bg-black" id="photo-viewport-3">
+                                    <img id="user-photo-3" src="https://placehold.co/600x800/d9cca8/1c1813?text=Drop+Friend+Photo" class="absolute w-full h-full object-cover select-none pointer-events-none filter sepia-[0.3] contrast-[1.1]">
+                                </div>
+                            </div>
+
+                            <!-- Right Column Text -->
+                            <div class="space-y-4 font-playfair text-xs leading-relaxed text-justify">
+                                <p class="first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-2 first-letter:font-playfair" id="display-body-vintage">
+                                    Eyewitnesses report unprecedented levels of commotion near the downtown district earlier this evening. Officials have declined to comment on the nature of the disturbance, though rumors of magical interference continue to circulate among local merchants.
+                                </p>
+                                <p class="text-xs">
+                                    "We have never seen anything quite like this in all our years of reporting," stated the Editor-in-Chief during an impromptu morning briefing. Further updates will follow in our evening special edition.
+                                </p>
+                                <div class="border-t border-b border-[#1c1813] py-2 my-2 text-center font-cinzel font-bold text-xs uppercase" id="display-reward-vintage">
+                                    SPECIAL REPORT: ALL RIGHTS RESERVED
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vintage Footer -->
+                        <div class="border-t-2 border-[#1c1813] pt-3 text-center flex justify-between text-[10px] uppercase font-bold tracking-widest text-[#4a3f30]">
+                            <span>Vol. XXIV No. 312</span>
+                            <span>The Daily Gazette Publishing Co.</span>
+                            <span>Edition Final</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Application JavaScript -->
+    <script>
+        // State management
+        let currentTemplate = 'wizard';
+        let imgState = {
+            scale: 1,
+            x: 0,
+            y: 0,
+            isDragging: false,
+            startX: 0,
+            startY: 0
+        };
+
+        // Presets data
+        const presets = {
+            wizard: {
+                headline: "HAVE YOU SEEN THIS WIZARD?",
+                subhead: "SIRIUS BLACK",
+                reward: "REWARD: 10,000 GALLEONS",
+                date: "OCTOBER 31, 1981",
+                paper: "THE DAILY PROPHET • 5 KNUTS",
+                body: "Minister of Magic Cornelius Fudge has confirmed that dangerous fugitive Sirius Black, unrepentant mass murderer and supporter of He-Who-Must-Not-Be-Named, has been spotted laughing in broad daylight in Muggle London."
+            },
+            undesirable: {
+                headline: "UNDESIRABLE",
+                subhead: "HARRY POTTER",
+                reward: "FOR THE INTERROGATION OF MINISTRY SECRETS",
+                date: "NO. 1",
+                paper: "MINISTRY OF MAGIC BULLETIN",
+                body: "Anyone providing information leading to the arrest or capture of this individual will be handsomely rewarded. Harboring fugitives is punishable by immediate Azkaban sentence."
+            },
+            missing: {
+                headline: "HAVE YOU SEEN THIS FRIEND?",
+                subhead: "CHRONIC PROCRASTINATOR",
+                reward: "REWARD: 1 LARGE PEPPERONI PIZZA",
+                date: "TODAY & EVERY DAY",
+                paper: "THE DAILY GOSSIP • FREE",
+                body: "Last seen wandering aimlessly looking for their phone charger and snacks. Known to disappear for hours down TikTok rabbit holes. Approach with caution and offer coffee immediately."
+            },
+            funny: {
+                headline: "MOST DRAMATIC PERSON",
+                subhead: "EXCELLENCE IN OVERREACTING",
+                reward: "PRIZE: 1 OSCAR STATUETTE",
+                date: "EMERGENCY BULLETIN",
+                paper: "THE DAILY TABLOID",
+                body: "Recognized universally for turning minor inconveniences into major motion picture plotlines. Subject is exceptionally vocal when hungry or tired."
+            }
+        };
+
+        // Switch templates
+        function setTemplate(templateName) {
+            currentTemplate = templateName;
+            
+            // Update button styles
+            ['wizard', 'undesirable', 'vintage'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if (t === templateName) {
+                    btn.className = "p-3 text-left rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center space-y-1 bg-amber-950/40 border-amber-600 text-amber-300 shadow";
+                } else {
+                    btn.className = "p-3 text-left rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center space-y-1 bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-800/80";
+                }
+            });
+
+            // Show/Hide Layers
+            document.getElementById('layout-wizard').style.zIndex = templateName === 'wizard' ? '20' : '0';
+            document.getElementById('layout-wizard').style.opacity = templateName === 'wizard' ? '1' : '0';
+            document.getElementById('layout-wizard').style.pointerEvents = templateName === 'wizard' ? 'auto' : 'none';
+
+            document.getElementById('layout-undesirable').style.zIndex = templateName === 'undesirable' ? '20' : '0';
+            document.getElementById('layout-undesirable').style.opacity = templateName === 'undesirable' ? '1' : '0';
+            document.getElementById('layout-undesirable').style.pointerEvents = templateName === 'undesirable' ? 'auto' : 'none';
+
+            document.getElementById('layout-vintage').style.zIndex = templateName === 'vintage' ? '20' : '0';
+            document.getElementById('layout-vintage').style.opacity = templateName === 'vintage' ? '1' : '0';
+            document.getElementById('layout-vintage').style.pointerEvents = templateName === 'vintage' ? 'auto' : 'none';
+
+            // Load matching preset values if switching
+            if (presets[templateName]) {
+                document.getElementById('input-headline').value = presets[templateName].headline;
+                document.getElementById('input-subhead').value = presets[templateName].subhead;
+                document.getElementById('input-reward').value = presets[templateName].reward;
+                document.getElementById('input-date').value = presets[templateName].date;
+                document.getElementById('input-paper').value = presets[templateName].paper;
+                document.getElementById('input-body').value = presets[templateName].body;
+                updateText();
+            }
+        }
+
+        // Load Preset helper
+        function loadPreset(key) {
+            if (presets[key]) {
+                document.getElementById('input-headline').value = presets[key].headline;
+                document.getElementById('input-subhead').value = presets[key].subhead;
+                document.getElementById('input-reward').value = presets[key].reward;
+                document.getElementById('input-date').value = presets[key].date;
+                document.getElementById('input-paper').value = presets[key].paper;
+                document.getElementById('input-body').value = presets[key].body;
+                updateText();
+            } else if (key === 'wizard') {
+                setTemplate('wizard');
+            } else if (key === 'undesirable') {
+                setTemplate('undesirable');
+            }
+        }
+
+        // Real-time Text Update
+        function updateText() {
+            const h = document.getElementById('input-headline').value;
+            const sub = document.getElementById('input-subhead').value;
+            const rew = document.getElementById('input-reward').value;
+            const dt = document.getElementById('input-date').value;
+            const pap = document.getElementById('input-paper').value;
+            const bod = document.getElementById('input-body').value;
+
+            // Wizard elements
+            document.getElementById('display-headline').innerText = h;
+            document.getElementById('display-subhead').innerText = sub;
+            document.getElementById('display-reward').innerText = rew;
+            document.getElementById('display-date').innerText = dt;
+            document.getElementById('display-paper').innerText = pap;
+            document.getElementById('display-body').innerText = bod;
+
+            // Undesirable elements
+            document.getElementById('display-undesirable-no').innerText = dt;
+            document.getElementById('display-subhead-2').innerText = sub;
+            document.getElementById('display-reward-2').innerText = rew;
+            document.getElementById('display-body-2').innerText = bod;
+
+            // Vintage elements
+            document.getElementById('display-headline-vintage').innerText = h;
+            document.getElementById('display-subhead-vintage').innerText = sub;
+            document.getElementById('display-reward-vintage').innerText = rew;
+            document.getElementById('display-vintage-date').innerText = dt;
+            document.getElementById('display-vintage-price').innerText = pap;
+            document.getElementById('display-body-vintage').innerText = bod;
+        }
+
+        // Image Upload handler
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const src = evt.target.result;
+                    document.getElementById('user-photo').src = src;
+                    document.getElementById('user-photo-2').src = src;
+                    document.getElementById('user-photo-3').src = src;
+                    
+                    // Reset pan/zoom
+                    imgState.scale = 1;
+                    imgState.x = 0;
+                    imgState.y = 0;
+                    document.getElementById('img-zoom').value = 100;
+                    document.getElementById('zoom-val').innerText = 100;
+                    updateImageTransform();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resetImage() {
+            const defaultUrl = "https://placehold.co/600x800/3e271a/d4b595?text=Drop+Friend+Photo";
+            document.getElementById('user-photo').src = defaultUrl;
+            document.getElementById('user-photo-2').src = defaultUrl;
+            document.getElementById('user-photo-3').src = defaultUrl;
+            imgState.scale = 1;
+            imgState.x = 0;
+            imgState.y = 0;
+            document.getElementById('img-zoom').value = 100;
+            document.getElementById('zoom-val').innerText = 100;
+            updateImageTransform();
+        }
+
+        // Zoom & Filter Transform
+        function updateImageTransform() {
+            const zoom = document.getElementById('img-zoom').value;
+            document.getElementById('zoom-val').innerText = zoom;
+            imgState.scale = zoom / 100;
+
+            const filterType = document.getElementById('img-filter').value;
+            let filterStyle = "";
+            if (filterType === 'sepia') filterStyle = "sepia(0.7) contrast(1.2)";
+            else if (filterType === 'grayscale') filterStyle = "grayscale(1) contrast(1.4)";
+            else if (filterType === 'highcontrast') filterStyle = "contrast(1.8) brightness(0.9)";
+            else filterStyle = "none";
+
+            const transformStr = `translate(${imgState.x}px, ${imgState.y}px) scale(${imgState.scale})`;
+            
+            ['user-photo', 'user-photo-2', 'user-photo-3'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.transform = transformStr;
+                    el.style.filter = filterStyle;
+                }
+            });
+        }
+
+        // Drag / Pan functionality for photo positioning
+        function startDrag(e) {
+            imgState.isDragging = true;
+            imgState.startX = (e.clientX || e.touches[0].clientX) - imgState.x;
+            imgState.startY = (e.clientY || e.touches[0].clientY) - imgState.y;
+
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', onDrag);
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        function onDrag(e) {
+            if (!imgState.isDragging) return;
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            
+            imgState.x = clientX - imgState.startX;
+            imgState.y = clientY - imgState.startY;
+            updateImageTransform();
+        }
+
+        function stopDrag() {
+            imgState.isDragging = false;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', onDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        // Responsive auto-scaling for preview screen
+        function adjustPosterScale() {
+            const wrapper = document.getElementById('poster-scale-wrapper');
+            const container = document.getElementById('poster-container');
+            const parent = wrapper.parentElement;
+            
+            const parentWidth = parent.clientWidth - 48;
+            const parentHeight = parent.clientHeight - 48;
+
+            const targetWidth = 816;
+            const targetHeight = 1056;
+
+            const scaleX = parentWidth / targetWidth;
+            const scaleY = parentHeight / targetHeight;
+            let scale = Math.min(scaleX, scaleY, 1);
+            if (scale < 0.3) scale = 0.3;
+
+            container.style.transform = `scale(${scale})`;
+            wrapper.style.width = `${targetWidth * scale}px`;
+            wrapper.style.height = `${targetHeight * scale}px`;
+        }
+
+        window.addEventListener('resize', adjustPosterScale);
+        window.addEventListener('DOMContentLoaded', () => {
+            setTemplate('wizard');
+            adjustPosterScale();
+        });
+    </script>
+</body>
+</html>
